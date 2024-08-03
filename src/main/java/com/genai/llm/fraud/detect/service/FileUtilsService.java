@@ -147,7 +147,7 @@ public class FileUtilsService
 		
 		String currentDir = System.getProperty("user.dir");
 		//String resourcePath = currentDir + "\\"+ "\\src\\main\\resources\\application.properties";
-		String resourcePath = currentDir + "\\src\\main\\resources\\application.properties";
+		String resourcePath = currentDir + "/src/main/resources/application.properties";
 		
 		String vectorDbName = new FileUtilsService().extractFields("vector.db.name", resourcePath);
 		config.put("vectorDbName", vectorDbName);

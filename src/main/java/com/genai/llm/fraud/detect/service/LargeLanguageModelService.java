@@ -52,7 +52,7 @@ public class LargeLanguageModelService
 		Map<String, String> llmServerConfig = new HashMap<String, String>();
 		
 		String currentDir = System.getProperty("user.dir");
-		String resoucePath = currentDir + "\\"+ "\\src\\main\\resources\\application.properties";
+		String resoucePath = currentDir + "/"+ "src/main/resources/application.properties";
 		
 		String modelName       = fileUtilsSvc.extractFields("llm.model.name", resoucePath);		
 		String llmServerPort   = fileUtilsSvc.extractFields("llm.server.port", resoucePath);

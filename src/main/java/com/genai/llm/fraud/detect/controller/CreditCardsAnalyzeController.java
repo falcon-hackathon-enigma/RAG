@@ -66,7 +66,7 @@ public class CreditCardsAnalyzeController
 	
 		
 		String currentDir = System.getProperty("user.dir");
-		String resourcePath = currentDir + "\\"+ "\\src\\main\\resources\\application.properties";
+		String resourcePath = currentDir + "/"+ "src/main/resources/application.properties";
 		String vectorDbName = new FileUtilsService().extractFields("vector.db.name", resourcePath);
 		vectorDataSvc.load(fileNameWithFullPath, vectorDbName);
 		

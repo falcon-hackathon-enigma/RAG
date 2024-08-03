@@ -21,7 +21,7 @@ public class AppConfigLoadService
 		
 		//load app config data
 		String currentDir = System.getProperty("user.dir");
-		String appPropertiesPath = currentDir + "\\"+ "\\src\\main\\resources\\application.properties";		
+		String appPropertiesPath = currentDir + "/"+ "src/main/resources/application.properties";		
 		String vectorDbName = new FileUtilsService().extractFields("vector.db.name", appPropertiesPath);
 		
 		//load training/context data
