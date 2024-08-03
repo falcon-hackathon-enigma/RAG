@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  genai:
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+  chroma:
+    image: ghcr.io/chroma-core/chroma:latest
+    volumes:
+      - index_data:/chroma/.chroma/index
+    ports:
+      - 8000:8000
+    networks:
+      - app-network
+volumes:
+  index_data:
+    driver: local
+  backups:
+    driver: local	  
+networks:
+  app-network:
+    driver: bridge
