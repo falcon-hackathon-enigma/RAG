@@ -27,7 +27,7 @@ public class AppConfigLoadService
 		//load training/context data
 		String trainingDataReload = new FileUtilsService().extractFields("training.data.reload", appPropertiesPath);
 		String trainingDataCreditcardFraudDetect = new FileUtilsService().extractFields("training.data.creditcard.rewards", appPropertiesPath);		
-		String resoucePath = currentDir + "\\"+ trainingDataCreditcardFraudDetect;
+		String resoucePath = currentDir + "/"+ trainingDataCreditcardFraudDetect;
 		
 		if("Y".equals(trainingDataReload))
 		{
