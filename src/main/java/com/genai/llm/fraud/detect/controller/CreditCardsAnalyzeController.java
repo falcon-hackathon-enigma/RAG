@@ -1,5 +1,7 @@
 package com.genai.llm.fraud.detect.controller;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.genai.llm.fraud.detect.service.CreditCardsAnalyze;
+import com.genai.llm.fraud.detect.service.CreditCardsContext;
 import com.genai.llm.fraud.detect.service.FileUtilsService;
 import com.genai.llm.fraud.detect.service.RetrievalService;
 import com.genai.llm.fraud.detect.service.VectorDataStoreService;
@@ -73,8 +76,8 @@ public class CreditCardsAnalyzeController
 	/*
 	 * endpoint to load newer contexts provided by the user
 	 */
-	@PostMapping("/context")
-	public ResponseEntity<String> loadContext(@RequestParam("file") String fileNameWithFullPath) 
+	@PostMapping("/contextFromFile")
+	public ResponseEntity<String> loadContextFromFile(@RequestParam("file") String fileNameWithFullPath) 
 	{
 		String response = null;
 		if(fileNameWithFullPath == null || "".equals(fileNameWithFullPath.trim()))
@@ -88,6 +91,39 @@ public class CreditCardsAnalyzeController
 		String resourcePath = currentDir + "/"+ "src/main/resources/application.properties";
 		String vectorDbName = new FileUtilsService().extractFields("vector.db.name", resourcePath);
 		vectorDataSvc.load(fileNameWithFullPath, vectorDbName);
+		
+		response = "Vector DB new context loaded";
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	/*
+	 * endpoint to load newer contexts provided by the user
+	 */
+	@PostMapping("/context")
+	public ResponseEntity<String> loadContext(@RequestBody List<String> context) 
+	{
+		String response = null;
+		if(context == null || context.size() == 0)
+		{
+			response = "Context is empty. Nothing to load";
+			return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+		}		
+	
+		
+		String currentDir = System.getProperty("user.dir");
+		String resourcePath = currentDir + "/"+ "src/main/resources/application.properties";
+		String vectorDbName = new FileUtilsService().extractFields("vector.db.name", resourcePath);
+		
+		try
+		{
+			vectorDataSvc.load(context, vectorDbName);
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			response = "Failure : VectorDB operation failed";
+			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);	
+		}		
 		
 		response = "Vector DB new context loaded";
 		return new ResponseEntity<>(response, HttpStatus.OK);

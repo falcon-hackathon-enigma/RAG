@@ -159,6 +159,15 @@ public class VectorDataStoreService
 		System.out.println("---- completed loading context to vectorDB " + vectorDbName);
     }
 	
+	/*
+	 * loads context to vectorDB
+	 */
+	public void load(List<String> context, String vectorDbName) 
+	{
+		System.out.println("\n---- started loading context to vectorDB "+ vectorDbName);		
+		insertVectorData(modelSvc.getEmbeddingModel(), context, vectorDbName);
+    }
+	
 	
 	/*
 	 * loads context with genuine txn patterns to vectorDB
