@@ -21,10 +21,10 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 @Service
 public class VectorDataStoreService 
 {			
-	@Value("${retrieval.max.limit:1}")
+	@Value("${retrieval.max.limit}")
 	int maxResultsToRetrieve; 
 	
-	@Value("${embeddings.min.score:0.5}")
+	@Value("${embeddings.min.score}")
 	double minScoreRelevanceScore;	 
 	
 	@Autowired
@@ -35,6 +35,15 @@ public class VectorDataStoreService
 	
 	@Autowired
 	private FileUtilsService fileUtilsSvc;
+	
+	@Autowired
+	private Utils utils;
+	
+	@Value("${retrieval.max.limit}")
+	Integer defaultRetrievalMaxLimit;
+	
+	@Value("${embeddings.min.score}")
+	Double defaultEmbeddingsMinScore;
 	
 	StringBuilder contentBldr = new StringBuilder();
 	String content = "";
@@ -54,13 +63,19 @@ public class VectorDataStoreService
 	/*
 	 * vectorDB operations to fetch records
 	 */
-	public String retrieve(String text) 
+	public String retrieve(String text, Integer maxResultsToRetrieve, Double minScoreRelevanceScore) 
 	{	
-		System.out.println("\n--- started vectorDB operations");
-		System.out.println("---- embeddingModel : "+ modelSvc.getEmbeddingModel() +" \n "+"text : "+ text +" \n "+"minScore : "+ minScoreRelevanceScore +" \n "+"maxResults : "+ maxResultsToRetrieve);
+		System.out.println("\n---- started vectorDB operations \n ---- embeddingModel initial inputs : "+ modelSvc.getEmbeddingModel() +" \n "+"text : "+ text +" \n "+"minScore : "+ minScoreRelevanceScore +" \n "+"maxResults : "+ maxResultsToRetrieve);
+
+		//step 0- handle inputs
+		maxResultsToRetrieve = utils.handleInputs(maxResultsToRetrieve, defaultRetrievalMaxLimit);
+		minScoreRelevanceScore = utils.handleInputs(minScoreRelevanceScore, defaultEmbeddingsMinScore);
+		System.out.println("\n---- embeddingModel final inputs : "+ modelSvc.getEmbeddingModel() +" \n "+"text : "+ text +" \n "+"minScore : "+ minScoreRelevanceScore +" \n "+"maxResults : "+ maxResultsToRetrieve);
 		
-		List<EmbeddingMatch<TextSegment>> result = fetchRecords(text);	
+		//step 1- invoke vector DB fetch
+		List<EmbeddingMatch<TextSegment>> result = fetchRecords(text, maxResultsToRetrieve, minScoreRelevanceScore);
 		
+		//step 2- process results
 		StringBuilder responseBldr = new StringBuilder();
 		StringBuilder tempResponseBldr = new StringBuilder();
 		
@@ -110,7 +125,7 @@ public class VectorDataStoreService
 	/*
 	 * fetches records from vectorDB based on semantic similarities
 	 */
-	public List<EmbeddingMatch<TextSegment>> fetchRecords(String query) 
+	public List<EmbeddingMatch<TextSegment>> fetchRecords(String query, int maxResultsToRetrieve, double minScoreRelevanceScore) 
 	{
 		EmbeddingModel embdgModel= modelSvc.getEmbeddingModel();		
 		EmbeddingStore<TextSegment> embdgStore = contextLoadSvc.getEmbeddingStore();  
@@ -118,7 +133,7 @@ public class VectorDataStoreService
         Embedding queryEmbedding = embdgModel.embed(query).content();
         return  embdgStore.findRelevant(queryEmbedding, maxResultsToRetrieve, minScoreRelevanceScore);
     }
-	
+		
 	/*
 	 * fetches records from vectorDB based on semantic similarities
 	 */

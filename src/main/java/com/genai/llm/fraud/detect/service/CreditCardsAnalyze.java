@@ -5,7 +5,9 @@ public class CreditCardsAnalyze
 
 	String systemMsg;
 	String usrMsg;
-	Float temperature = 0.4f;
+	Float temperature;
+	int  maxLimit; 
+	double minScore;
 	
 	public String getSystemMsg() {
 		return systemMsg;
@@ -25,10 +27,22 @@ public class CreditCardsAnalyze
 	public void setTemperature(Float temperature) {
 		this.temperature = temperature;
 	}
+	public int getMaxLimit() {
+		return maxLimit;
+	}
+	public void setMaxLimit(int maxLimit) {
+		this.maxLimit = maxLimit;
+	}
+	public double getMinScore() {
+		return minScore;
+	}
+	public void setMinScore(double minScore) {
+		this.minScore = minScore;
+	}
 	
 	@Override
 	public String toString() {
-		return "CreditCardsAnalyze [systemMsg=" + systemMsg + ", usrMsg=" + usrMsg + ", temperature=" + temperature + "]";
+		return "CreditCardsAnalyze [systemMsg=" + systemMsg + ", usrMsg=" + usrMsg + ", temperature=" + temperature
+				+ ", maxLimit=" + maxLimit + ", minScore=" + minScore + "]";
 	}	
-	
 }

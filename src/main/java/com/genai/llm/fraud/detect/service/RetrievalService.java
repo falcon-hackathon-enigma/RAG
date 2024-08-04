@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import dev.langchain4j.data.document.Metadata;
 import dev.langchain4j.data.embedding.Embedding;
@@ -35,12 +36,30 @@ public class RetrievalService
 	@Autowired
 	private VectorDataStoreService vectorDataSvc;
 	
-	public String orchestrate(String systemMsg, String text, Integer maxResultsToRetrieveDynamic, 
-							  Double minScoreRelevanceScoreDynamic, Float temperature) 
+	@Autowired
+	private Utils utils;
+	
+	
+	@Value("${llm.system.message}")
+	String defaultSystemMessage; 
+	
+	@Value("${llm.response.temperature}")
+	Float defaultTemperature; 
+	
+	public String orchestrate(String systemMsg, 
+							  String text, 
+							  Integer maxResultsToRetrieveDynamic, 
+							  Double minScoreRelevanceScoreDynamic, 
+							  Float temperature) 
 							  throws Exception 
 	{	
+		//step -0 : handle inputs
+		systemMsg = utils.handleInputs(systemMsg, defaultSystemMessage);
+		temperature = utils.handleInputs(temperature, defaultTemperature);
+		
+		
 		//--step -1  : get context information from the DB 
-		String contextFromVectorDb =  vectorDataSvc.retrieve(text);
+		String contextFromVectorDb =  vectorDataSvc.retrieve(text, maxResultsToRetrieveDynamic, minScoreRelevanceScoreDynamic);
 		
 		//--step -2  : prepare full prompt
 		String promptWithFullContext = systemMsg + " These are the creditcards available " + contextFromVectorDb + " \n Here is the user requirement "  +   text ;				
@@ -48,30 +67,31 @@ public class RetrievalService
 		
 		//--step -3  : invoke LLM
 		return execute(promptWithFullContext, temperature);
-	}
-	
+	}	
+
 	private String execute(String prompt, Float temperature)
 			throws IOException, InterruptedException 
 	{	
 		if(prompt.contains("\n"))
 		{
-			System.out.println("\n found");
+			System.out.println("\n\n backslash n found");
 			prompt = prompt.replaceAll("\n", "");			
-			System.out.println(" contains \n "+prompt.contains("\n"));
+			System.out.println(" contains backslash n "+prompt.contains("\n"));
 		}
 		if(prompt.contains("\t"))
 		{
-			System.out.println("\t found");
+			System.out.println(" \n\n backslash t found");
 			prompt = prompt.replaceAll("\t", "");			
-			System.out.println(" contains \t "+prompt.contains("\t"));
+			System.out.println(" contains backslash t "+prompt.contains("\t"));
 		}		
 		if(prompt.contains("\r"))
 		{
-			System.out.println("\r found");
+			System.out.println(" \n\n backslash r found");
 			prompt = prompt.replaceAll("\r", "");			
-			System.out.println(" contains \r "+prompt.contains("\r"));
+			System.out.println(" contains backslash  r "+prompt.contains("\r"));
 		}
 		
+		//how to feed temperature param   vj1
 		HttpRequest request = HttpRequest.newBuilder()
 								.uri(URI.create("https://api.ai71.ai/v1/chat/completions"))
 								.header("Content-Type", "application/json")
@@ -80,7 +100,8 @@ public class RetrievalService
 								.build();
 		
 		HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+		
 		System.out.println("\n---- response \n"+response.body());
 		return response.body();		
-	}	
+	}
 }
