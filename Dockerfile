@@ -1,5 +1,5 @@
 FROM maven:3.8.3-openjdk-17
-ENV ai71_token=api71-api-cd7bc3cf-053b-44fd-a966-3e050e5f8183
+ENV ai71_token=api71-api-ab177020-538d-497f-960f-bceb3ad98cf3
 WORKDIR /app
 COPY . .
 RUN mvn clean install
